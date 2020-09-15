@@ -256,6 +256,7 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
   NSUInteger const toTime = [RCTConvert NSInteger:params[@"toTime"]];
   NSArray<NSString *> *const mimeTypes = [RCTConvert NSStringArray:params[@"mimeTypes"]];
   NSArray<NSString *> *const include = [RCTConvert NSStringArray:params[@"include"]];
+  NSString *const sortBy = [RCTConvert NSString:params[@"sort_by"]];
 
   BOOL __block includeFilename = [include indexOfObject:@"filename"] != NSNotFound;
   BOOL __block includeFileSize = [include indexOfObject:@"fileSize"] != NSNotFound;
@@ -284,8 +285,21 @@ RCT_EXPORT_METHOD(getPhotos:(NSDictionary *)params
     //   will not be set, as expected
     assetFetchOptions.fetchLimit = first + 1;
   }
-  assetFetchOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
   
+  NSMutableArray* sortDescArr = [[NSMutableArray alloc]init];
+   if ( [sortBy  isEqual: @"creation_date"]) {
+     [sortDescArr addObject:[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+
+   }
+   else if ([sortBy  isEqual: @"modification_date"]) {
+        [sortDescArr addObject:[NSSortDescriptor sortDescriptorWithKey:@"modificationDate" ascending:NO]];
+   }
+  
+   else { // default
+       [sortDescArr addObject:[NSSortDescriptor sortDescriptorWithKey:@"modificationDate" ascending:NO]];
+   }
+  assetFetchOptions.sortDescriptors = sortDescArr;
+
   BOOL __block foundAfter = NO;
   BOOL __block hasNextPage = NO;
   BOOL __block resolvedPromise = NO;
